@@ -168,7 +168,7 @@ def webcam_recognition():
 
 def video_recognition():
     # Open the input movie file
-    video_path = "hamilton.mp4"
+    video_path = "ham.mp4"
     input_movie = cv2.VideoCapture(video_path)
     rotateCode = check_rotation(video_path)
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -192,8 +192,7 @@ def video_recognition():
         # Grab a single frame of video
         if(frame_number>1):
             ret, frame = input_movie.read()
-        if rotateCode is not None:
-            frame = correct_rotation(frame, rotateCode)
+        frame = correct_rotation(frame, rotateCode)
         frame_number += 1
 
         # Quit when the input video file ends
