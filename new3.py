@@ -1,3 +1,5 @@
+import sys
+sys.path.append('/home/dhairyapatel/.local/lib/python3.10/site-packages')
 import cv2
 import numpy as np
 from tkinter import *
@@ -7,6 +9,8 @@ from tkinter import filedialog
 import face_recognition
 import os
 import shutil
+import ffmpeg
+import ffprobe
 
 def clear_screen():
     count = 0
@@ -111,7 +115,7 @@ def image_add():
 def webcam_recognition():
 
     # Gets a reference to webcam #0 (default)
-    video_capture = cv2.VideoCapture(2)
+    video_capture = cv2.VideoCapture(0)
 
     while True:
 
@@ -164,12 +168,18 @@ def webcam_recognition():
 
 def video_recognition():
     # Open the input movie file
-    input_movie = cv2.VideoCapture("clip.mp4")
+    video_path = "hamilton.mp4"
+    input_movie = cv2.VideoCapture(video_path)
+    rotateCode = check_rotation(video_path)
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = int(input_movie.get(cv2.CAP_PROP_FPS))
 
     # Create an output movie file (make sure resolution/frame rate matches input video!)
+    ret, frame = input_movie.read()
+    height, width, channels = frame.shape
+        
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    output_movie = cv2.VideoWriter('output.avi', fourcc, 30.00, (1280, 720))
+    output_movie = cv2.VideoWriter('output.avi', fourcc, fps, (width, height))
     #640
 
     # Initialize some variables
@@ -180,7 +190,10 @@ def video_recognition():
 
     while True:
         # Grab a single frame of video
-        ret, frame = input_movie.read()
+        if(frame_number>1):
+            ret, frame = input_movie.read()
+        if rotateCode is not None:
+            frame = correct_rotation(frame, rotateCode)
         frame_number += 1
 
         # Quit when the input video file ends
@@ -237,6 +250,26 @@ def video_recognition():
     # All done!
     input_movie.release()
     cv2.destroyAllWindows()
+
+def check_rotation(path_video_file):
+     # this returns meta-data of the video file in form of a dictionary
+     meta_dict = ffmpeg.probe(path_video_file)
+
+     # from the dictionary, meta_dict['streams'][0]['tags']['rotate'] is the key
+     # we are looking for
+     rotateCode = None
+     if 'rotate' in meta_dict['streams'][0]['tags']:
+         if int(meta_dict['streams'][0]['tags']['rotate']) == 90:
+             rotateCode = cv2.ROTATE_90_CLOCKWISE
+         elif int(meta_dict['streams'][0]['tags']['rotate']) == 180:
+             rotateCode = cv2.ROTATE_180
+         elif int(meta_dict['streams'][0]['tags']['rotate']) == 270:
+             rotateCode = cv2.ROTATE_90_COUNTERCLOCKWISE
+
+     return rotateCode
+
+def correct_rotation(frame, rotateCode):  
+     return cv2.rotate(frame, rotateCode) 
 
 root = Tk()
 root.resizable(height = None, width = None)
