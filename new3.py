@@ -43,7 +43,7 @@ def image_recognition():
         # Loops through each face found in the unknown image
         for (top, right, bottom, left), unknown_encoding in zip(face_locations, unknown_encodings):
             # Looks for a match from the known face(s)
-            results = face_recognition.compare_faces(known_face_encodings, unknown_encoding)
+            results = face_recognition.compare_faces(known_face_encodings, unknown_encoding, 0.45)
             name = "Unknown"
             # If a match was found in known_face_encodings, just use the first one.
             # if True in matches:
@@ -111,7 +111,7 @@ def image_add():
 def webcam_recognition():
 
     # Gets a reference to webcam #0 (default)
-    video_capture = cv2.VideoCapture(0)
+    video_capture = cv2.VideoCapture(2)
 
     while True:
 
@@ -128,7 +128,7 @@ def webcam_recognition():
         # Loops through each face in the frame
         for (top, right, bottom, left), unknown_encoding in zip(face_locations, unknown_encodings):
             # Looks for a match from the known face(s)
-            matches = face_recognition.compare_faces(known_face_encodings, unknown_encoding)
+            matches = face_recognition.compare_faces(known_face_encodings, unknown_encoding, 0.50)
 
             name = "Unknown"
 
@@ -164,24 +164,13 @@ def webcam_recognition():
 
 def video_recognition():
     # Open the input movie file
-    input_movie = cv2.VideoCapture("hamilton_clip.mp4")
+    input_movie = cv2.VideoCapture("clip.mp4")
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
 
     # Create an output movie file (make sure resolution/frame rate matches input video!)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    output_movie = cv2.VideoWriter('output.avi', fourcc, 29.97, (640, 360))
-
-    # Load some sample pictures and learn how to recognize them.
-    lmm_image = face_recognition.load_image_file("obama.jpg")
-    lmm_face_encoding = face_recognition.face_encodings(lmm_image)[0]
-
-    al_image = face_recognition.load_image_file("biden.jpg")
-    al_face_encoding = face_recognition.face_encodings(al_image)[0]
-
-    known_faces = [
-        lmm_face_encoding,
-        al_face_encoding
-    ]
+    output_movie = cv2.VideoWriter('output.avi', fourcc, 30.00, (1280, 720))
+    #640
 
     # Initialize some variables
     face_locations = []
@@ -208,15 +197,21 @@ def video_recognition():
         face_names = []
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
-            match = face_recognition.compare_faces(known_faces, face_encoding, tolerance=0.50)
+            results = face_recognition.compare_faces(known_face_encodings, face_encoding)
 
             # If you had more than 2 faces, you could make this logic a lot prettier
             # but I kept it simple for the demo
             name = None
-            if match[0]:
-                name = "Biden"
-            elif match[1]:
-                name = "Obama"
+            
+            face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+            best_match_index = np.argmin(face_distances)
+            if results[best_match_index]:
+                name = known_face_names[best_match_index]
+                            
+            #if match[1]:
+                #name = "Biden"
+            #elif match[0]:
+                #name = "Obama"
 
             face_names.append(name)
 
@@ -236,6 +231,8 @@ def video_recognition():
         # Write the resulting image to the output video file
         print("Writing frame {} / {}".format(frame_number, length))
         output_movie.write(frame)
+        if(frame_number==length):
+            break
 
     # All done!
     input_movie.release()
