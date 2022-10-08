@@ -1,5 +1,4 @@
-import sys
-sys.path.append('/home/dhairyapatel/.local/lib/python3.10/site-packages')
+
 import cv2
 import numpy as np
 from tkinter import *
@@ -10,7 +9,6 @@ import face_recognition
 import os
 import shutil
 import ffmpeg
-import ffprobe
 
 def clear_screen():
     count = 0
@@ -167,12 +165,15 @@ def webcam_recognition():
     cv2.destroyAllWindows()
 
 def video_recognition():
+    rotateCode = 0
     # Open the input movie file
-    video_path = "ham.mp4"
-    input_movie = cv2.VideoCapture(video_path)
-    rotateCode = check_rotation(video_path)
+    root.filename = filedialog.askopenfilename(initialdir="/home/dhairyapatel", title="Select a video", filetypes=(("Video files", "*.mp4"), ("All files", "*.*")))
+    input_movie = cv2.VideoCapture(root.filename)
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
     fps = int(input_movie.get(cv2.CAP_PROP_FPS))
+    meta_dict = ffmpeg.probe(root.filename)
+    if 'rotate' in meta_dict['streams'][0]['tags']:
+        rotateCode = 1
 
     # Create an output movie file (make sure resolution/frame rate matches input video!)
     ret, frame = input_movie.read()
@@ -187,12 +188,13 @@ def video_recognition():
     face_encodings = []
     face_names = []
     frame_number = 0
-
+    
     while True:
         # Grab a single frame of video
         if(frame_number>1):
             ret, frame = input_movie.read()
-        frame = correct_rotation(frame, rotateCode)
+        if rotateCode:
+            frame = cv2.flip(frame, flipCode=-1)
         frame_number += 1
 
         # Quit when the input video file ends
@@ -250,26 +252,6 @@ def video_recognition():
     input_movie.release()
     cv2.destroyAllWindows()
 
-def check_rotation(path_video_file):
-     # this returns meta-data of the video file in form of a dictionary
-     meta_dict = ffmpeg.probe(path_video_file)
-
-     # from the dictionary, meta_dict['streams'][0]['tags']['rotate'] is the key
-     # we are looking for
-     rotateCode = None
-     if 'rotate' in meta_dict['streams'][0]['tags']:
-         if int(meta_dict['streams'][0]['tags']['rotate']) == 90:
-             rotateCode = cv2.ROTATE_90_CLOCKWISE
-         elif int(meta_dict['streams'][0]['tags']['rotate']) == 180:
-             rotateCode = cv2.ROTATE_180
-         elif int(meta_dict['streams'][0]['tags']['rotate']) == 270:
-             rotateCode = cv2.ROTATE_90_COUNTERCLOCKWISE
-
-     return rotateCode
-
-def correct_rotation(frame, rotateCode):  
-     return cv2.rotate(frame, rotateCode) 
-
 root = Tk()
 root.resizable(height = None, width = None)
 root.geometry("1000x800")
@@ -288,9 +270,8 @@ for file in os.listdir("Database"):
     known_face_encodings.append(known_encoding)
     known_face_names.append(file.split(".")[0].title())
     
-addImageButton = Button(root, text="Add image to Database", command=image_add).place(relx=0.2, rely=0.5, anchor=CENTER)
-imageRecognitionButton = Button(root, text="Image Recognition", command=image_recognition).place(relx=0.4, rely=0.5, anchor=CENTER)
-webcamRecognitionButton = Button(root, text="Live Webcam Recognition", command=webcam_recognition).place(relx=0.6, rely=0.5, anchor=CENTER)
-videoRecognitionButton = Button(root, text="Video Recognition", command=video_recognition).place(relx=0.8, rely=0.5, anchor=CENTER)
+imageRecognitionButton = Button(root, text="Image Recognition", command=image_recognition).place(relx=0.2, rely=0.5, anchor=CENTER)
+webcamRecognitionButton = Button(root, text="Live Webcam Recognition", command=webcam_recognition).place(relx=0.5, rely=0.5, anchor=CENTER)
+videoRecognitionButton = Button(root, text="Video Recognition", command=video_recognition).place(relx=0.8115, rely=0.5, anchor=CENTER)
 
 root.mainloop()
