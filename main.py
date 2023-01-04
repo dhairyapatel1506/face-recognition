@@ -10,6 +10,7 @@ import shutil
 import ffmpeg
 import codecs, json
 
+# Class to JSONify the NumPy array
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
@@ -241,16 +242,17 @@ dataFile = "database.json"
 avlbleDatabase = []
 delCount = 0
 
-# Creates arrays of known face Encodings and their names
-
 if not os.path.exists("database.json"):
-    for file in os.listdir("Database"):
-        known_image = face_recognition.load_image_file(f"Database/{file}")
+
+    # Creates arrays of known face Encodings and their names
+    for file in os.listdir("Image Database"):
+        known_image = face_recognition.load_image_file(f"Image\ Database/{file}")
         known_encoding = face_recognition.face_encodings(known_image)[0]
         known_face_encodings.append(known_encoding)
         known_face_names.append(file.split(".")[0].title())
 
 else:
+    # Loads the contents of the JSON file into the arrays
     with open(dataFile, 'r') as dF: 
         database = json.load(dF)
     unjsondEncodings = json.loads(database['encodings'])
@@ -258,20 +260,20 @@ else:
     known_face_encodings = known_face_encodings.tolist()
     known_face_names = database['names'].copy()
 
-
-    for file in os.listdir("Database"):
+    # Creates and appends the data of any new persons added to the Image Database to the existing data
+    for file in os.listdir("Image Database"):
         if file.split(".")[0].title() not in database['names']:
-            new_image = face_recognition.load_image_file(f"Database/{file}")
+            new_image = face_recognition.load_image_file(f"Image Database/{file}")
             new_encoding = face_recognition.face_encodings(new_image)[0]
             new_encoding = new_encoding.tolist()
             known_face_encodings.append(new_encoding)
             known_face_names.append(file.split(".")[0].title())
 
-
-    for file in os.listdir("Database"):
+    # Creates a list of all the persons in the Image Database
+    for file in os.listdir("Image Database"):
         avlbleDatabase.append(file.split(".")[0].title())
 
-    delCount = 0
+    # Removes any persons discarded from the Image Database from the arrays
     dupnamelist = known_face_names[:]
     for name in dupnamelist:
         if name not in avlbleDatabase:
@@ -280,12 +282,15 @@ else:
         else:
             delCount += 1
 
+# JSONifies the NumPy array 
 jsondEncodings = json.dumps(known_face_encodings, cls=NumpyEncoder)
+
 database = {
         'names': known_face_names,
         'encodings': jsondEncodings
 }
 
+# Dumps the data into a JSON file
 with open(dataFile, 'w') as dF:
     json.dump(database, dF)
 
