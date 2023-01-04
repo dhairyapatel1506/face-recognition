@@ -8,6 +8,13 @@ import face_recognition
 import os
 import shutil
 import ffmpeg
+import codecs, json
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 def clear_screen():
     count = 0
@@ -230,13 +237,57 @@ my_label=ttk.Label(root, image=my_background)
 my_label.place(x=0, y=0, relwidth=1, relheight=1)
 known_face_names = []
 known_face_encodings = []
+dataFile = "database.json"
+avlbleDatabase = []
+delCount = 0
 
 # Creates arrays of known face Encodings and their names
-for file in os.listdir("Database"):
-    known_image = face_recognition.load_image_file(f"Database/{file}")
-    known_encoding = face_recognition.face_encodings(known_image)[0]
-    known_face_encodings.append(known_encoding)
-    known_face_names.append(file.split(".")[0].title())
+
+if not os.path.exists("database.json"):
+    for file in os.listdir("Database"):
+        known_image = face_recognition.load_image_file(f"Database/{file}")
+        known_encoding = face_recognition.face_encodings(known_image)[0]
+        known_face_encodings.append(known_encoding)
+        known_face_names.append(file.split(".")[0].title())
+
+else:
+    with open(dataFile, 'r') as dF: 
+        database = json.load(dF)
+    unjsondEncodings = json.loads(database['encodings'])
+    known_face_encodings = np.asarray(unjsondEncodings.copy())
+    known_face_encodings = known_face_encodings.tolist()
+    known_face_names = database['names'].copy()
+
+
+    for file in os.listdir("Database"):
+        if file.split(".")[0].title() not in database['names']:
+            new_image = face_recognition.load_image_file(f"Database/{file}")
+            new_encoding = face_recognition.face_encodings(new_image)[0]
+            new_encoding = new_encoding.tolist()
+            known_face_encodings.append(new_encoding)
+            known_face_names.append(file.split(".")[0].title())
+
+
+    for file in os.listdir("Database"):
+        avlbleDatabase.append(file.split(".")[0].title())
+
+    delCount = 0
+    dupnamelist = known_face_names[:]
+    for name in dupnamelist:
+        if name not in avlbleDatabase:
+            del(known_face_encodings[delCount])
+            known_face_names.remove(name)
+        else:
+            delCount += 1
+
+jsondEncodings = json.dumps(known_face_encodings, cls=NumpyEncoder)
+database = {
+        'names': known_face_names,
+        'encodings': jsondEncodings
+}
+
+with open(dataFile, 'w') as dF:
+    json.dump(database, dF)
 
 imageRecognitionButton = Button(root, text="Image Recognition", command=image_recognition).place(relx=0.2, rely=0.5, anchor=CENTER)
 webcamRecognitionButton = Button(root, text="Live Webcam Recognition", command=webcam_recognition).place(relx=0.5, rely=0.5, anchor=CENTER)
