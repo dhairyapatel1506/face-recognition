@@ -9,6 +9,7 @@ import os
 import shutil
 import ffmpeg
 import codecs, json
+from ffmpeg import _probe
 
 # Class to JSONify the NumPy array
 class NumpyEncoder(json.JSONEncoder):
@@ -148,7 +149,7 @@ def video_recognition():
         fps = int(input_movie.get(cv2.CAP_PROP_FPS))
 
         # Gets metadata of the file
-        meta_dict = ffmpeg.probe(root.filename)
+        meta_dict = ffmpeg._probe.probe(root.filename)
 
         # Checks if metadata contains rotate tag
         if 'rotate' in meta_dict['streams'][0]['tags']:
