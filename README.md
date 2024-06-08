@@ -3,6 +3,6 @@ The world's simplest GUI-based Facial Recognition System built using the <a href
 <p align="center"> <img src="https://github.com/dhairyapatel1506/facial-recognition/assets/101339040/df7a5291-20ab-4004-a3cb-ee252bb38186"> </p>
 
 # Features
-- Can recgonize faces from images.
+- Can recgonize faces through images.
 - Can recognize faces in real-time through a webcam.
-- Can recognize faces from video.
+- Can recognize faces through video.
