@@ -31,7 +31,7 @@ def image_recognition():
     clear_screen()
 
     # Opens File Dialog Box
-    root.filename = filedialog.askopenfilename(initialdir="/home/dhairyapatel/Pictures", title="Select an image", filetypes=(("Image files", "*.jpg *.jpeg *.png *.webp *.avif"), ("All files", "*.*")))
+    root.filename = filedialog.askopenfilename(initialdir=".", title="Select an image", filetypes=(("Image files", "*.jpg *.jpeg *.png *.webp *.avif"), ("All files", "*.*")))
 
     if(root.filename):
         
@@ -138,7 +138,7 @@ def webcam_recognition():
 
 def video_recognition():
     rotateCode = 0
-    root.filename = filedialog.askopenfilename(initialdir="/home/dhairyapatel/Videos", title="Select a video", filetypes=(("Video files", "*.mp4"), ("All files", "*.*")))
+    root.filename = filedialog.askopenfilename(initialdir=".", title="Select a video", filetypes=(("Video files", "*.mp4"), ("All files", "*.*")))
 
     if(root.filename):
 
