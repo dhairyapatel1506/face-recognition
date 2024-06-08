@@ -8,5 +8,6 @@ The world's simplest GUI-based Facial Recognition System built using the <a href
 - Can recognize faces through video.
 
 # Requirements & Setup
-- First, refer <a href="https://github.com/ageitgey/face_recognition/#installation">this</a> to install all the basic dependencies.
-- Then, install ffmpeg (Video Recognition won't work without this) and you should be good to go.
+- First, refer <a href="https://github.com/ageitgey/face_recognition/#installation">this</a> for the requirements and to install all the basic dependencies.
+- Then, install ffmpeg (Video Recognition won't work without this) and you should be good to go:
+   - ```sudo apt install ffmpeg```
