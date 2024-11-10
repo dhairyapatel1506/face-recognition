@@ -7,10 +7,31 @@ The world's simplest GUI-based Facial Recognition System built using the <a href
 - Can recognize faces in real-time through a webcam.
 - Can recognize faces through video.
 
-# Requirements & Setup
+<!--# Requirements & Setup
 - First, refer <a href="https://github.com/ageitgey/face_recognition/#installation">this</a> for the requirements and to install all the basic dependencies.
 - Then, install ffmpeg (Video Recognition won't work without this) and you should be good to go:
    - ```sudo apt install ffmpeg```
+-->
+# Requirements & Setup
+
+- First, refer to [this guide](https://github.com/ageitgey/face_recognition/#installation) for installing `dlib`, which is a dependency for `face_recognition`.
+
+- Then, install the following system dependencies:
+  ```bash
+  sudo apt update
+  sudo apt install python3-pip
+  sudo apt install ffmpeg         # Required for video recognition
+  sudo apt install python3-tk     # Required for tkinter GUI support
+  ```
+
+- Install the required Python packages:
+  ```bash
+  pip install opencv-python-headless  # For cv2
+  pip install numpy                   # For numerical operations
+  pip install pillow                  # For image processing with PIL
+  pip install face_recognition        # For face recognition
+  pip install ffmpeg-python           # Wrapper for ffmpeg
+  ```
 
 # Usage
 <p align="center"> <img src="https://github.com/dhairyapatel1506/facial-recognition/assets/101339040/8f11f10b-54d3-4394-8fdb-d70266a10c7c"> </p>
